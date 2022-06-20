@@ -1,9 +1,9 @@
 # toffeecoin
-Blockchain sencilla construida en NodeJs
+Blockchain sencilla construida en NodeJs<br>
 
-Conceptos tratados:
--Blockchain
--Bloque
--Transacciones
--Wallets (Aún en construcción)
--Merkle tree (Aún en construcción)
+Conceptos tratados:<br>
+-Blockchain<br>
+-Bloque<br>
+-Transacciones<br>
+-Wallets (Aún en construcción)<br>
+-Merkle tree (Aún en construcción)<br>
