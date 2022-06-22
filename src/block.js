@@ -3,14 +3,14 @@ const difficulty  = 3;
 const MINE_RATE = 1000;
 
 class Block {
-    constructor(blockIndex, blockCreation, blockTx, blockPreviousHash){
-        this.timestamp = new Date().getTime(); // timestamp
+    constructor(timestamp, blockIndex, blockTx, blockPreviousHash, nonce, difficulty){
+        this.timestamp = timestamp; // timestamp
         this.blockIndex = blockIndex; // La posición del bloque en la cadena
         this.blockTx = blockTx; // Transacciones y data
         this.blockPreviousHash = blockPreviousHash; // Hash del bloque anterior para poder conectarlos
-        this.hash = this.getHash(); // Convierte toda la info del bloque en un hash
-        //this.nonce = nonce; // El número usado para el PoW
-        //this.merkleRoot = this.getMerkleRoot(); *** Método pendiente *** Investigar como implementar el árbol Merkle
+        this.hash = hash; // this.getHash(); // Convierte toda la info del bloque en un hash
+        this.nonce = nonce; // El número usado para el PoW
+        this.merkleRoot = this.getMerkleRoot(); //*** Método pendiente *** Investigar como implementar el árbol Merkle
         this.difficulty = difficulty; // Acá se definirá la dificultad que requiere crear el bloque (Número de 0000 iniciales en el hash) *** Pendiente crear método
     }
 
@@ -36,24 +36,9 @@ class Block {
     }
 
     // Método para minar nuevos bloques, también lo hago estático para solo invocarlo desde la clase sin necesidad de una nueva instancia
-    static mine(blockPreviousHash, data) {
-        const { hash: previousHash } = blockPreviousHash;
-        let { difficulty } = blockPreviousHash;
-        let hash;
-        let time;
-        let nonce = 0;
-    
-        do {
-          time = Date.now();
-          nonce += 1;
-          difficulty =
-          blockPreviousHash.time + MINE_RATE > time ? difficulty + 1 : difficulty - 1;
-          hash = SHA256(blockPreviousHash + time + data + nonce + difficulty).toString();
-        } while (hash.substring(0, difficulty) !== "0".repeat(difficulty));
-    
-        return new this(time, blockPreviousHash, hash, data, nonce, difficulty);
+    static mine(previousBlock, data) {
+        
       }
-
 
     printBlock(){
         const {timestamp, blockIndex, hash, blockTx, previousHash} = this; //Básicamente estoy sacando toda la info del bloque
