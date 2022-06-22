@@ -5,6 +5,7 @@ class Blockchain {
     this.chain = [Block.genesis];
   }
 
+  // Método para añadir un nuevo bloque a la blockchain
   addBlock(data) {
     const previousBlock = this.chain[this.chain.length - 1];
     const block = Block.mine(previousBlock, data);

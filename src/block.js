@@ -1,5 +1,6 @@
 const { SHA256 } = require("crypto-js");
-const  difficulty  = 3;
+const difficulty  = 3;
+const MINE_RATE = 1000;
 
 class Block {
     constructor(blockIndex, blockCreation, blockTx, blockPreviousHash){
@@ -35,11 +36,23 @@ class Block {
     }
 
     // Método para minar nuevos bloques, también lo hago estático para solo invocarlo desde la clase sin necesidad de una nueva instancia
-    static mine(){
-        const {hash: PreviousHash} = PreviousBlock; //Lo único que va a ser constante en la creación de un nuevo bloque es el bloque previo, todo lo demás es nuevo
-
-
-    }
+    static mine(previousBlock, data) {
+        const { hash: previousHash } = previousBlock;
+        let { difficulty } = previousBlock;
+        let hash;
+        let time;
+        let nonce = 0;
+    
+        do {
+          time = Date.now();
+          nonce += 1;
+          difficulty =
+            previousBlock.time + MINE_RATE > time ? difficulty + 1 : difficulty - 1;
+          hash = SHA256(previousHash + time + data + nonce + difficulty).toString();
+        } while (hash.substring(0, difficulty) !== "0".repeat(difficulty));
+    
+        return new this(time, previousHash, hash, data, nonce, difficulty);
+      }
 
 
     printBlock(){
