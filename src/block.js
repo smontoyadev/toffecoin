@@ -53,8 +53,28 @@ class Block {
         -----------------------------------
         `
     }
+0000000
+    computeMerkleRoot() {
+        let treeList = this.generateMerkleTreeRoot();
+        return treeList[treeList.length-1];
+    }
 
-    getMerkleRoot(){
+    // Implementación del árbol de merkle, construida a base de ejemplos (Fue lo que más me costó entender)
+    getMerkleRoot(){ 
+        let tree = [];
+        let transactionCount = this.blockTransactions.length;
+ 
+        for (var i=0; i<transactionCount; i++) { tree.push(this.blockTransactions[i].hash); } let levelOffset = 0; for (let levelSize = transactionCount; levelSize > 1; levelSize = (levelSize + 1) / 2) {          
+            for (let left = 0; left < levelSize; left += 2) {            
+                let right = Math.min(left + 1, levelSize - 1);
+                let tleft = tree[levelOffset + left];
+                let tright = tree[levelOffset + right];
+                tree.push(hash(tleft + tright));
+            }            
+            levelOffset += levelSize;
+        }
+ 
+        return tree;
 
     }
 
