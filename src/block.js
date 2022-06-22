@@ -3,20 +3,20 @@ const MINE_RATE = 1000;
 difficulty = 0;
 
 class Block {
-    constructor(timestamp, blockIndex, blockTx, blockPreviousHash, blockHash, nonce, difficulty){
+    constructor(timestamp, blockIndex = 1, blockTx, blockPreviousHash, blockHash, nonce, difficulty){
         this.timestamp = timestamp; // timestamp
         this.blockIndex = blockIndex; // La posición del bloque en la cadena
         this.blockTx = blockTx; // Transacciones y data
         this.blockPreviousHash = blockPreviousHash; // Hash del bloque anterior para poder conectarlos
-        this.blockHash = blockHash // this.getHash(); // Convierte toda la info del bloque en un hash
+        this.blockHash = Block.getHash(this); // Convierte toda la info del bloque en un hash
         this.nonce = nonce; // El número usado para el PoW
-        //this.merkleRoot = this.getMerkleRoot(); //*** Método pendiente *** Investigar como implementar el árbol Merkle
+        this.merkleRoot = this.getMerkleRoot(); //*** Método pendiente *** Investigar como implementar el árbol Merkle
         this.difficulty = difficulty; // Acá se definirá la dificultad que requiere crear el bloque (Número de 0000 iniciales en el hash) *** Pendiente crear método
     }
 
-    // Método para obtener un hash, lo implementaré dentro de otro método más adelante
-    getHash(){
-        // Método modificado, *** revisar github
+    // Método para obtener el hash del bloque (this)
+    static getHash(block){
+        return SHA256(block.timestamp, block.blockIndex.toString(), JSON.stringify(block.blockTx), block.blockPreviousHash, block.nonce, block.difficulty).toString();
     }
 
 
@@ -38,23 +38,7 @@ class Block {
 
     // Método para minar nuevos bloques, también lo hago estático para solo invocarlo desde la clase sin necesidad de una nueva instancia
    static mine(previousBlock, blockTx) {
-    const { blockHash: blockPreviousHash } = previousBlock;
-    let { difficulty } = previousBlock;
-    let blockHash;
-    let blockIndex = 0;
-    let timestamp;
-    let nonce = 0;
-
-    do {
-      timestamp = Date.now();
-      nonce += 1;
-      blockIndex += 1;
-      difficulty =
-        previousBlock.time + MINE_RATE > timestamp ? difficulty + 1 : difficulty - 1;
-        blockHash = SHA256(timestamp, blockIndex, blockTx, blockPreviousHash, nonce, difficulty).toString();
-    } while (blockHash.substring(0, difficulty) !== "0".repeat(difficulty));
-
-    return new this(timestamp, blockIndex, blockTx, blockPreviousHash, blockHash, nonce, difficulty);
+    
   }
 
     printBlock(){
@@ -79,9 +63,9 @@ class Block {
     // Implementación del árbol de merkle, construida a base de ejemplos (Fue lo que más me costó entender)
     getMerkleRoot(){ 
         let tree = [];
-        let transactionCount = this.blockTransactions.length;
+        let transactionCount = this.blockTx.length;
  
-        for (var i=0; i<transactionCount; i++) { tree.push(this.blockTransactions[i].hash); } let levelOffset = 0; for (let levelSize = transactionCount; levelSize > 1; levelSize = (levelSize + 1) / 2) {          
+        for (var i=0; i<transactionCount; i++) { tree.push(this.blockTx[i].getHash); } let levelOffset = 0; for (let levelSize = transactionCount; levelSize > 1; levelSize = (levelSize + 1) / 2) {          
             for (let left = 0; left < levelSize; left += 2) {            
                 let right = Math.min(left + 1, levelSize - 1);
                 let tleft = tree[levelOffset + left];
@@ -102,5 +86,5 @@ module.exports = Block;
 
 
 // Pruebas rápidas de creación de bloque y de su hash
-// blockTest = new Block(0,0,0,0);
+// blockTest = new Block(0,0,0,0,0,0,0);
 // console.log(JSON.stringify(blockTest,null,2));
