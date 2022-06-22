@@ -1,4 +1,3 @@
-const Block = require("./src/block");
 const Blockchain = require("./src/blockchain");
 
 const blockchain = new Blockchain();

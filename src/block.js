@@ -1,31 +1,32 @@
 const { SHA256 } = require("crypto-js");
-const difficulty  = 3;
 const MINE_RATE = 1000;
+difficulty = 0;
 
 class Block {
-    constructor(timestamp, blockIndex, blockTx, blockPreviousHash, nonce, difficulty){
+    constructor(timestamp, blockIndex, blockTx, blockPreviousHash, blockHash, nonce, difficulty){
         this.timestamp = timestamp; // timestamp
         this.blockIndex = blockIndex; // La posición del bloque en la cadena
         this.blockTx = blockTx; // Transacciones y data
         this.blockPreviousHash = blockPreviousHash; // Hash del bloque anterior para poder conectarlos
-        this.hash = hash; // this.getHash(); // Convierte toda la info del bloque en un hash
+        this.blockHash = blockHash // this.getHash(); // Convierte toda la info del bloque en un hash
         this.nonce = nonce; // El número usado para el PoW
-        this.merkleRoot = this.getMerkleRoot(); //*** Método pendiente *** Investigar como implementar el árbol Merkle
+        //this.merkleRoot = this.getMerkleRoot(); //*** Método pendiente *** Investigar como implementar el árbol Merkle
         this.difficulty = difficulty; // Acá se definirá la dificultad que requiere crear el bloque (Número de 0000 iniciales en el hash) *** Pendiente crear método
     }
 
+    // Método para obtener un hash, lo implementaré dentro de otro método más adelante
     getHash(){
-        return SHA256(this.blockPreviousHash + this.blockCreation + JSON.stringify(this.blockTx)).toString();
+        // Método modificado, *** revisar github
     }
 
 
     // Creación del bloque génesis, lo hago estático para poder acceder sin necesidad de crear una instancia nueva, 
     // No tengo que crear un bloque para llamar este método, lo llamo directo desde la clase
     static get genesis() {
-        const blockCreation = new Date().getTime();
+        const timestamp = new Date().getTime();
 
         return new this (
-            blockCreation, // Timestamp
+            timestamp, // Timestamp
             0, // Id del génesis
             'Génesis', // Tx pero solo le pasaré esta info por el momento
             'Undefined', // Undefined por que no tiene bloque previo
@@ -36,18 +37,36 @@ class Block {
     }
 
     // Método para minar nuevos bloques, también lo hago estático para solo invocarlo desde la clase sin necesidad de una nueva instancia
-    static mine(previousBlock, data) {
-        
-      }
+   static mine(previousBlock, blockTx) {
+    const { blockHash: blockPreviousHash } = previousBlock;
+    let { difficulty } = previousBlock;
+    let blockHash;
+    let blockIndex = 0;
+    let timestamp;
+    let nonce = 0;
+
+    do {
+      timestamp = Date.now();
+      nonce += 1;
+      blockIndex += 1;
+      difficulty =
+        previousBlock.time + MINE_RATE > timestamp ? difficulty + 1 : difficulty - 1;
+        blockHash = SHA256(timestamp, blockIndex, blockTx, blockPreviousHash, nonce, difficulty).toString();
+    } while (blockHash.substring(0, difficulty) !== "0".repeat(difficulty));
+
+    return new this(timestamp, blockIndex, blockTx, blockPreviousHash, blockHash, nonce, difficulty);
+  }
 
     printBlock(){
-        const {timestamp, blockIndex, hash, blockTx, previousHash} = this; //Básicamente estoy sacando toda la info del bloque
+        const {timestamp, blockIndex, blockTx, blockPreviousHash, blockHash, nonce, difficulty} = this; //Básicamente estoy sacando toda la info del bloque
         return `Toffeecoin Block - 
         Time: ${timestamp}
         Index: ${blockIndex}
-        Hash: ${hash}
+        Hash: ${blockHash}
         Transactions: ${blockTx}
-        Previous Hash: ${previousHash}
+        Previous Hash: ${blockPreviousHash}
+        Nonce: ${nonce}
+        Difficulty: ${difficulty}
         -----------------------------------
         `
     }
