@@ -11,7 +11,7 @@ class Block {
         this.hash = this.getHash(); // Convierte toda la info del bloque en un hash
         //this.nonce = nonce; // El número usado para el PoW
         //this.merkleRoot = this.getMerkleRoot(); *** Método pendiente *** Investigar como implementar el árbol Merkle
-        //this.difficulty = difficulty; // Acá se definirá la dificultad que requiere crear el bloque (Número de 0000 iniciales en el hash) *** Pendiente crear método
+        this.difficulty = difficulty; // Acá se definirá la dificultad que requiere crear el bloque (Número de 0000 iniciales en el hash) *** Pendiente crear método
     }
 
     getHash(){
@@ -36,9 +36,9 @@ class Block {
     }
 
     // Método para minar nuevos bloques, también lo hago estático para solo invocarlo desde la clase sin necesidad de una nueva instancia
-    static mine(previousBlock, data) {
-        const { hash: previousHash } = previousBlock;
-        let { difficulty } = previousBlock;
+    static mine(blockPreviousHash, data) {
+        const { hash: previousHash } = blockPreviousHash;
+        let { difficulty } = blockPreviousHash;
         let hash;
         let time;
         let nonce = 0;
@@ -47,26 +47,26 @@ class Block {
           time = Date.now();
           nonce += 1;
           difficulty =
-            previousBlock.time + MINE_RATE > time ? difficulty + 1 : difficulty - 1;
-          hash = SHA256(previousHash + time + data + nonce + difficulty).toString();
+          blockPreviousHash.time + MINE_RATE > time ? difficulty + 1 : difficulty - 1;
+          hash = SHA256(blockPreviousHash + time + data + nonce + difficulty).toString();
         } while (hash.substring(0, difficulty) !== "0".repeat(difficulty));
     
-        return new this(time, previousHash, hash, data, nonce, difficulty);
+        return new this(time, blockPreviousHash, hash, data, nonce, difficulty);
       }
 
 
     printBlock(){
-        const {timestamp, blockIndex, hash, blockTx, blockPreviousHash} = this; //Básicamente estoy sacando toda la info del bloque
+        const {timestamp, blockIndex, hash, blockTx, previousHash} = this; //Básicamente estoy sacando toda la info del bloque
         return `Toffeecoin Block - 
         Time: ${timestamp}
         Index: ${blockIndex}
         Hash: ${hash}
         Transactions: ${blockTx}
-        Previous Hash: ${blockPreviousHash}
+        Previous Hash: ${previousHash}
         -----------------------------------
         `
     }
-0000000
+
     computeMerkleRoot() {
         let treeList = this.generateMerkleTreeRoot();
         return treeList[treeList.length-1];
